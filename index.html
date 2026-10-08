@@ -1,890 +1,928 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Wandering Eyes</title>
-  <meta name="theme-color" content="#0a0a0a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="icon" type="image/svg+xml" href="fav.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Wandering Eyes · Generative Art Collection</title>
+  <meta name="description" content="Wandering Eyes — a collection of five p5.js works drawn with circles, triangles, rectangles, and lines. A crow, a column, a dance studio, a black sky, and the eye of the world. A catalogue of computational geometric compositions for fashion, textile, and surface design." />
+  <meta name="theme-color" content="#0a0a0a" />
+  <link rel="icon" type="image/svg+xml" href="images/fav.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
   <style>
-    /* --- perfect reset --- */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --bg: #0a0a0a;
+      --bg-soft: #0f0f0e;
+      --paper: #f4f1ea;
+      --paper-soft: #ebe6db;
+      --ink: #141414;
+      --ink-soft: #5a5650;
+      --gold: #b8935a;
+      --gold-soft: #d4b483;
+      --gold-deep: #80633b;
+      --line: rgba(244, 241, 234, 0.10);
+      --line-dark: rgba(20, 20, 20, 0.14);
+      --text: rgba(244, 241, 234, 0.88);
+      --text-dim: rgba(244, 241, 234, 0.48);
+      --text-faint: rgba(244, 241, 234, 0.22);
+      --serif: "Cormorant Garamond", Georgia, serif;
+      --mono: "DM Mono", ui-monospace, monospace;
+      --page: min(1180px, calc(100% - 64px));
     }
-    html, body {
-      background: #0a0a0a;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      min-height: 100dvh;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--bg); overflow-x: hidden; }
+    body {
+      background: var(--bg); color: var(--text); font-family: var(--mono);
+      font-size: 13px; line-height: 1.6;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden; width: 100%;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    img, canvas { display: block; max-width: 100%; height: auto; }
+    ::selection { background: var(--gold); color: var(--bg); }
+
+    .page { width: var(--page); margin: 0 auto; max-width: 100%; }
+    .eyebrow { display: inline-block; color: var(--gold-soft); font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; }
+    .section { padding: 140px 0; border-top: 1px solid var(--line); }
+    .section-head { display: grid; grid-template-columns: 160px 1fr; gap: 40px; margin-bottom: 80px; align-items: baseline; }
+    .section-number { color: var(--text-faint); font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; }
+    .section-title { font-family: var(--serif); font-size: clamp(2.6rem, 5.4vw, 4.8rem); font-weight: 300; line-height: 1.02; letter-spacing: -0.02em; color: var(--paper); }
+    .section-title em { font-style: italic; color: var(--gold-soft); }
+
+    .ribbon {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 20px; padding: 18px 32px;
+      background: rgba(10, 10, 10, 0.72);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--text-faint);
+    }
+    .ribbon-brand { font-family: var(--serif); font-size: 18px; letter-spacing: -0.01em; text-transform: none; color: var(--paper); flex-shrink: 0; }
+    .ribbon-brand em { color: var(--gold-soft); font-style: italic; }
+    .ribbon-nav { display: flex; gap: 28px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; flex-shrink: 1; min-width: 0; }
+    .ribbon-nav::-webkit-scrollbar { display: none; }
+    .ribbon-nav a { transition: color 300ms ease; white-space: nowrap; flex-shrink: 0; }
+    .ribbon-nav a:hover { color: var(--gold-soft); }
+    @media (max-width: 720px) {
+      .ribbon { padding: 12px 16px; gap: 14px; }
+      .ribbon-brand { font-size: 15px; }
+      .ribbon-nav { gap: 18px; font-size: 9px; mask-image: linear-gradient(to right, black 0, black calc(100% - 20px), transparent 100%); -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 20px), transparent 100%); }
+    }
+
+    .cover { min-height: 100vh; min-height: 100dvh; padding: 120px 0 60px; display: flex; flex-direction: column; justify-content: space-between; gap: 60px; }
+    .cover-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faint); }
+    .cover-meta .vol { color: var(--gold-soft); }
+    .cover-body { display: grid; grid-template-columns: 1fr; gap: 60px; align-items: center; flex: 1; }
+    @media (min-width: 900px) { .cover-body { grid-template-columns: 1.05fr 0.95fr; gap: 80px; } }
+    .cover-text { display: flex; flex-direction: column; gap: 32px; }
+    .cover-title { font-family: var(--serif); font-weight: 300; font-size: clamp(3.5rem, 8.5vw, 8rem); line-height: 0.92; letter-spacing: -0.03em; color: var(--paper); }
+    .cover-title em { font-style: italic; color: var(--gold-soft); display: block; }
+    .cover-sub { font-family: var(--serif); font-size: clamp(1.3rem, 1.9vw, 1.7rem); font-weight: 300; font-style: italic; line-height: 1.4; color: var(--text-dim); max-width: 500px; }
+    .cover-desc { color: var(--text-dim); font-size: 13px; line-height: 1.8; max-width: 460px; }
+    .cover-art { position: relative; aspect-ratio: 1; background: #000; border: 1px solid var(--line); overflow: hidden; max-width: 520px; margin-left: auto; width: 100%; }
+    .cover-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    @media (max-width: 720px) {
+      .cover { padding: 100px 0 40px; gap: 40px; }
+      .cover-title { font-size: clamp(3rem, 16vw, 5rem); }
+      .cover-art { margin: 0 auto; }
+    }
+    .cover-foot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; padding-top: 32px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faint); }
+    .cover-foot .k { display: block; color: var(--gold-soft); margin-bottom: 8px; }
+    .cover-foot .v { color: var(--text-dim); letter-spacing: 0.1em; line-height: 1.7; }
+    @media (max-width: 720px) { .cover-foot { grid-template-columns: 1fr; gap: 20px; } }
+
+    .statement { background: var(--bg-soft); border-top: 1px solid var(--line); padding: 140px 0; }
+    .statement-inner { display: grid; grid-template-columns: 200px 1fr; gap: 60px; align-items: start; }
+    .statement-label { position: sticky; top: 100px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold-soft); }
+    .statement-label .num { display: block; color: var(--text-faint); margin-bottom: 8px; }
+    .statement-body { max-width: 720px; display: flex; flex-direction: column; gap: 28px; }
+    .statement-lead { font-family: var(--serif); font-size: clamp(1.6rem, 3vw, 2.6rem); font-weight: 300; line-height: 1.25; letter-spacing: -0.01em; color: var(--paper); }
+    .statement-lead em { font-style: italic; color: var(--gold-soft); }
+    .statement-body p { color: var(--text-dim); font-size: 13.5px; line-height: 1.9; max-width: 62ch; }
+    .statement-body p strong { color: var(--text); font-weight: 500; }
+    .statement-ai { margin-top: 24px; padding: 22px 26px; border-left: 2px solid var(--gold); background: rgba(184, 147, 90, 0.04); color: var(--text-dim); font-size: 12.5px; line-height: 1.8; font-style: italic; }
+    .statement-ai strong { color: var(--gold-soft); font-style: normal; font-weight: 500; letter-spacing: 0.02em; }
+    @media (max-width: 900px) { .statement { padding: 90px 0; } .statement-inner { grid-template-columns: 1fr; gap: 28px; } .statement-label { position: static; } }
+    @media (max-width: 720px) { .statement { padding: 72px 0; } .statement-ai { padding: 18px 20px; font-size: 12px; } }
+
+    /* Works grid */
+    .works-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+    @media (max-width: 900px) { .works-grid { grid-template-columns: 1fr; gap: 80px; } }
+
+    .work-card { display: flex; flex-direction: column; gap: 24px; }
+    .work-card-head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em;
+      text-transform: uppercase;
+    }
+    .work-card-index { color: var(--gold-soft); }
+    .work-card-edition { color: var(--text-faint); }
+    .work-card-art {
+      position: relative;
+      aspect-ratio: 1;
+      background: #000;
+      border: 1px solid var(--line);
       overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', Roboto, Arial, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      touch-action: none;
-      -webkit-tap-highlight-color: transparent;
-      position: fixed;
+    }
+    .work-card-art img {
       width: 100%;
       height: 100%;
-      height: 100dvh;
-    }
-    
-    #main-container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
-      padding: 20px;
-      gap: 8px;
-    }
-    
-    /* --- title (center top) --- */
-    .title-bar {
-      text-align: center;
-      flex-shrink: 0;
-      padding: 2px 0;
-      width: 100%;
-    }
-    .title-bar .title {
-      font-size: 22px;
-      font-weight: 300;
-      letter-spacing: 8px;
-      color: rgba(255,255,255,0.85);
-      text-transform: uppercase;
-    }
-    .title-bar .title .accent {
-      color: #c9a84c;
-      font-weight: 400;
-    }
-    
-    /* --- canvas container (image holder) --- */
-    #canvas-container {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      min-height: 0;
-      padding: 0 10px;
-      position: relative;
-      background: #0a0a0a;
-    }
-    
-    /* --- image wrapper to maintain consistent aspect ratio --- */
-    .image-wrapper {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      aspect-ratio: 1 / 1;
-      max-height: 100%;
-    }
-    
-    #slide-image {
+      object-fit: cover;
       display: block;
-      box-shadow: 0 0 80px rgba(0,0,0,0.9);
-      image-rendering: auto;
-      touch-action: none;
-      max-width: 100%;
-      max-height: 100%;
-      width: auto;
-      height: auto;
-      object-fit: contain;
-      border-radius: 2px;
-      transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.5s ease, border 0.5s ease;
-      opacity: 1;
-      border: none;
     }
-    #slide-image.fade {
-      opacity: 0;
-      transform: scale(0.97);
-    }
-    
-    /* --- SHIRT MOCKUP --- */
-    #shirt-mockup {
-      display: none;
-      max-width: 100%;
-      max-height: 100%;
-      width: auto;
-      height: auto;
-      object-fit: contain;
-      border-radius: 2px;
-      box-shadow: 0 0 80px rgba(0,0,0,0.9);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    #shirt-mockup.active {
-      display: block;
-      animation: fadeIn 0.6s ease;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    
-    /* --- bottom bar --- */
-    .bottom-bar {
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      gap: 6px;
-      padding: 4px 0;
-    }
-    
-    .controls-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    .controls {
-      color: rgba(255,255,255,0.7);
-      background: rgba(255,255,255,0.04);
-      padding: 8px 20px;
-      border-radius: 30px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', Roboto, Arial, sans-serif;
-      font-size: 11px;
-      font-weight: 400;
-      border: 1px solid rgba(255,255,255,0.08);
-      text-align: center;
-      cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
-      transition: all 0.3s ease;
-      letter-spacing: 0.8px;
-      touch-action: manipulation;
-      min-height: 36px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
-    .controls:hover {
-      color: rgba(255,255,255,0.95);
-      border-color: rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.08);
-    }
-    .controls:active {
-      transform: scale(0.95);
-    }
-    .controls .key {
-      color: rgba(255,255,255,0.5);
-      font-weight: 300;
-    }
-    .controls .sep {
-      color: rgba(255,255,255,0.15);
-      margin: 0 4px;
-    }
-    
-    /* --- shirt/apparel button (gold) --- */
-    .controls.shirt-btn {
-      border-color: rgba(201, 168, 76, 0.2);
-      color: rgba(201, 168, 76, 0.7);
-      letter-spacing: 1px;
-    }
-    .controls.shirt-btn:hover {
-      border-color: rgba(201, 168, 76, 0.4);
-      color: #c9a84c;
-      background: rgba(201, 168, 76, 0.06);
-    }
-    .controls.shirt-btn.active {
-      border-color: rgba(201, 168, 76, 0.5);
-      color: #c9a84c;
-      background: rgba(201, 168, 76, 0.08);
-    }
-    .controls.shirt-btn .icon {
-      font-size: 14px;
-      line-height: 1;
-    }
-    
-    /* --- STORY BUTTON (Gold, matches apparel) --- */
-    .story-btn {
-      border-color: rgba(201, 168, 76, 0.15);
-      color: rgba(201, 168, 76, 0.6);
-      letter-spacing: 1px;
-      background: rgba(201, 168, 76, 0.03);
-    }
-    .story-btn:hover {
-      border-color: rgba(201, 168, 76, 0.3);
-      color: #c9a84c;
-      background: rgba(201, 168, 76, 0.06);
-    }
-    .story-btn .icon {
-      font-size: 14px;
-      line-height: 1;
-    }
-    
-    /* --- info row --- */
-    .info-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 14px;
-      color: rgba(255,255,255,0.3);
-      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
-      font-size: 9px;
-      letter-spacing: 0.5px;
-      flex-wrap: wrap;
-      padding: 2px 0;
-    }
-    .info-row .info-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 12px;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.04);
-      background: rgba(255,255,255,0.02);
-    }
-    .info-row .label {
-      color: rgba(255,255,255,0.25);
-      font-weight: 300;
-    }
-    .info-row .value {
-      color: rgba(255,255,255,0.6);
-      font-weight: 400;
-    }
-    
-    /* --- description --- */
-    .description {
-      display: block;
-      text-align: center;
-      color: rgba(255,255,255,0.25);
-      font-size: 8px;
-      letter-spacing: 1.2px;
-      line-height: 1.8;
-      padding: 2px 10px;
-      font-weight: 300;
-      max-width: 500px;
-      width: 100%;
+    .work-card-title { font-family: var(--serif); font-size: clamp(1.8rem, 2.6vw, 2.4rem); font-weight: 300; line-height: 1.05; letter-spacing: -0.01em; color: var(--paper); }
+    .work-card-title em { font-style: italic; color: var(--gold-soft); display: block; }
+    .work-card-desc { color: var(--text-dim); font-size: 12.5px; line-height: 1.8; max-width: 46ch; }
+    .work-card-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
       text-transform: uppercase;
     }
-    .description .highlight {
-      color: rgba(255,255,255,0.4);
+    .work-card-meta .k { color: var(--text-faint); display: block; margin-bottom: 6px; }
+    .work-card-meta .v { color: var(--paper); }
+
+    /* Process grid */
+    .process-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+    .process-card { min-height: 340px; padding: 44px 40px; background: var(--bg); display: flex; flex-direction: column; }
+    .process-number { color: var(--gold); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; }
+    .process-card h3 { margin: auto 0 20px; font-family: var(--serif); font-size: 2.2rem; font-weight: 300; line-height: 1.05; letter-spacing: -0.02em; color: var(--paper); }
+    .process-card p { max-width: 300px; color: var(--text-dim); font-size: 12.5px; line-height: 1.8; }
+    @media (max-width: 900px) { .process-grid { grid-template-columns: 1fr; } .process-card { min-height: auto; padding: 36px 32px; } .process-card h3 { margin-top: 32px; } }
+    @media (max-width: 720px) { .process-card { padding: 28px 24px; } }
+
+    /* Surfaces */
+    .application { background: var(--paper); color: var(--ink); border-top: 0; padding: 140px 0; }
+    .application .section-number { color: rgba(20, 20, 20, 0.4); }
+    .application .section-title { color: var(--ink); }
+    .application .section-title em { color: var(--gold-deep); }
+    .application-intro { max-width: 640px; margin: 0 0 80px auto; font-family: var(--serif); font-size: clamp(1.5rem, 2.4vw, 2.2rem); font-weight: 300; line-height: 1.25; letter-spacing: -0.01em; color: var(--ink); }
+    .application-intro span { color: var(--ink-soft); font-style: italic; }
+
+    .surface-work-head {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+      margin: 60px 0 32px; padding-bottom: 24px;
+      border-bottom: 1px solid var(--line-dark);
+      align-items: baseline;
     }
-    .description .sep {
-      color: rgba(255,255,255,0.08);
-      margin: 0 4px;
-    }
-    
-    /* ============================================
-       MODAL STYLES
-    ============================================ */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      padding: 20px;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-    
-    .modal-overlay.open {
-      display: flex;
-      opacity: 1;
-    }
-    
-    .modal-content {
-      max-width: 600px;
-      width: 100%;
-      max-height: 80vh;
-      background: rgba(20,20,20,0.95);
-      border-radius: 20px;
-      padding: 40px 40px 30px;
-      border: 1px solid rgba(201,168,76,0.15);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 80px rgba(201,168,76,0.05);
+    .surface-work-head:first-of-type { margin-top: 0; }
+    .surface-work-head h3 { font-family: var(--serif); font-size: clamp(1.6rem, 2.4vw, 2.2rem); font-weight: 300; line-height: 1.15; letter-spacing: -0.01em; color: var(--ink); }
+    .surface-work-head h3 em { font-style: italic; color: var(--gold-deep); }
+    .surface-work-head p { max-width: 44ch; color: var(--ink-soft); font-size: 12.5px; line-height: 1.75; }
+
+    .surface-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line-dark); border: 1px solid var(--line-dark); }
+    .surface-item { background: var(--paper); padding: 24px 20px 18px; display: flex; flex-direction: column; gap: 16px; }
+    .surface-item .surface-label { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(20, 20, 20, 0.5); }
+    .surface-item .surface-label .num { color: var(--gold-deep); }
+    .surface-item .surface-tile {
       position: relative;
-      transform: scale(0.95) translateY(20px);
-      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow-y: auto;
+      width: 100%;
+      background: #000;
+      overflow: hidden;
+      background-repeat: repeat;
+      background-position: center;
+      background-size: contain;
     }
-    
-    .modal-overlay.open .modal-content {
-      transform: scale(1) translateY(0);
+    .surface-item .surface-title { font-family: var(--serif); font-size: 16px; font-weight: 400; line-height: 1.2; color: var(--ink); }
+    .surface-item .surface-meta { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(20, 20, 20, 0.45); }
+    @media (max-width: 1000px) { .surface-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 720px) {
+      .application { padding: 72px 0; }
+      .application-intro { margin-left: 0; margin-bottom: 48px; }
+      .surface-work-head { grid-template-columns: 1fr; gap: 12px; margin-top: 48px; }
+      .surface-grid { grid-template-columns: 1fr; }
     }
-    
-    /* Modal scrollbar styling */
-    .modal-content::-webkit-scrollbar {
-      width: 3px;
+
+    /* Commission */
+    .commission { background: var(--bg-soft); padding: 140px 0; border-top: 1px solid var(--line); }
+    .commission-layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 100px; align-items: center; }
+    .commission-title { margin-top: 26px; font-family: var(--serif); font-size: clamp(3rem, 5.6vw, 5.6rem); font-weight: 300; line-height: 0.98; letter-spacing: -0.03em; color: var(--paper); }
+    .commission-title em { font-style: italic; color: var(--gold-soft); }
+    .commission-copy { max-width: 440px; color: var(--text-dim); font-size: 12.5px; line-height: 1.85; margin-bottom: 44px; }
+    .service-list { border-top: 1px solid var(--line); margin-bottom: 48px; }
+    .service-item { display: grid; grid-template-columns: 44px 1fr; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+    .service-item .num { color: var(--gold); font-size: 10px; letter-spacing: 0.22em; }
+    .service-item .title { display: block; color: var(--paper); font-family: var(--serif); font-size: 20px; font-weight: 400; margin-bottom: 4px; }
+    .service-item .desc { color: var(--text-dim); font-size: 12px; line-height: 1.7; max-width: 40ch; }
+    .contact-cta { display: inline-flex; align-items: center; justify-content: center; min-height: 54px; padding: 0 32px; background: var(--gold); color: var(--ink); font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; transition: background 300ms ease; }
+    .contact-cta:hover { background: var(--gold-soft); }
+    @media (max-width: 900px) { .commission { padding: 90px 0; } .commission-layout { grid-template-columns: 1fr; gap: 60px; } }
+    @media (max-width: 720px) { .commission { padding: 72px 0; } .commission-layout { gap: 48px; } .contact-cta { width: 100%; } }
+
+    /* Mockups */
+    .mockup-gallery { margin-top: 120px; padding-top: 80px; border-top: 1px solid var(--line); }
+    .mockup-head { display: grid; grid-template-columns: 160px 1fr; gap: 40px; margin-bottom: 60px; align-items: baseline; }
+    .mockup-title { font-family: var(--serif); font-size: clamp(2rem, 3.4vw, 3.2rem); font-weight: 300; line-height: 1.05; letter-spacing: -0.02em; color: var(--paper); }
+    .mockup-title em { font-style: italic; color: var(--gold-soft); }
+    .mockup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .mockup-item { display: flex; flex-direction: column; gap: 16px; }
+    .mockup-frame { position: relative; aspect-ratio: 4 / 3; background: #000; border: 1px solid var(--line); overflow: hidden; }
+    .mockup-frame img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 800ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+    .mockup-item:hover .mockup-frame img { transform: scale(1.04); }
+    .mockup-item figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-top: 4px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; }
+    .mockup-id { color: var(--paper); }
+    .mockup-seed { color: var(--gold-soft); }
+    .mockup-note { margin-top: 48px; max-width: 56ch; color: var(--text-dim); font-family: var(--serif); font-size: 1.15rem; font-style: italic; line-height: 1.6; }
+    @media (max-width: 900px) { .mockup-gallery { margin-top: 80px; padding-top: 56px; } .mockup-head { grid-template-columns: 1fr; gap: 16px; margin-bottom: 40px; } .mockup-grid { grid-template-columns: 1fr; gap: 24px; } }
+
+    /* Colophon */
+    .colophon { padding: 80px 0 60px; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.20em; text-transform: uppercase; color: var(--text-faint); }
+    .colophon .col-mark { display: block; font-family: var(--serif); font-size: 22px; font-style: italic; letter-spacing: 0; text-transform: none; color: var(--paper); margin-bottom: 12px; }
+    .colophon .col-mark em { color: var(--gold-soft); }
+    .colophon .col p { color: var(--text-dim); font-size: 11px; letter-spacing: 0.1em; text-transform: none; line-height: 1.8; max-width: 30ch; }
+    .colophon .col-title { display: block; color: var(--gold-soft); margin-bottom: 16px; }
+    .colophon .col a { display: block; color: var(--text-dim); line-height: 2.1; transition: color 300ms ease; letter-spacing: 0.14em; word-break: break-word; }
+    .colophon .col a:hover { color: var(--gold-soft); }
+    .colophon-end { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 32px; margin-top: 32px; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; color: var(--text-faint); }
+    .colophon-end .mark { color: var(--gold-soft); font-family: var(--serif); font-size: 14px; font-style: italic; letter-spacing: 0; text-transform: none; }
+    @media (max-width: 900px) { .colophon { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 560px) { .colophon { grid-template-columns: 1fr 1fr; gap: 24px; } }
+    @media (max-width: 380px) { .colophon { grid-template-columns: 1fr; gap: 28px; } }
+
+    /* Legal modal */
+    .legal-modal { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 24px; }
+    .legal-modal.open { display: flex; }
+    .legal-overlay { position: absolute; inset: 0; background: rgba(10, 10, 10, 0.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: legalFade 280ms ease; }
+    .legal-dialog { position: relative; width: min(560px, 100%); max-height: 82vh; overflow-y: auto; background: var(--bg-soft); border: 1px solid var(--line); padding: 48px 44px 32px; animation: legalRise 320ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+    .legal-close { position: absolute; top: 14px; right: 18px; background: transparent; border: 0; color: var(--text-faint); font-size: 26px; line-height: 1; cursor: pointer; transition: color 300ms ease; }
+    .legal-close:hover { color: var(--gold-soft); }
+    .legal-eyebrow { display: inline-block; color: var(--gold-soft); font-family: var(--mono); font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; margin-bottom: 14px; }
+    .legal-title { font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 300; line-height: 1.1; letter-spacing: -0.01em; color: var(--paper); margin-bottom: 24px; }
+    .legal-body { color: var(--text-dim); font-family: var(--mono); font-size: 12.5px; line-height: 1.9; }
+    .legal-body p { margin-bottom: 14px; }
+    .legal-body p:last-child { margin-bottom: 0; }
+    .legal-body strong { color: var(--text); font-weight: 500; }
+    .legal-foot { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faint); }
+    .legal-foot a { color: var(--gold-soft); word-break: break-all; }
+    @keyframes legalFade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes legalRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 560px) { .legal-dialog { padding: 40px 24px 24px; } }
+
+    @media (max-width: 720px) {
+      :root { --page: min(1180px, calc(100% - 32px)); }
+      .section { padding: 72px 0; }
+      .section-head { grid-template-columns: 1fr; gap: 12px; margin-bottom: 48px; }
+      .section-title { font-size: clamp(2rem, 8vw, 3rem); }
     }
-    .modal-content::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.02);
-      border-radius: 10px;
-    }
-    .modal-content::-webkit-scrollbar-thumb {
-      background: rgba(201,168,76,0.3);
-      border-radius: 10px;
-    }
-    .modal-content::-webkit-scrollbar-thumb:hover {
-      background: rgba(201,168,76,0.5);
-    }
-    
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    
-    .modal-title {
-      color: #c9a84c;
-      font-size: 16px;
-      font-weight: 400;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-    }
-    
-    .modal-title .work-number {
-      color: rgba(255,255,255,0.2);
-      font-size: 11px;
-      letter-spacing: 1px;
-      margin-left: 8px;
-    }
-    
-    .modal-close {
-      background: none;
-      border: none;
-      color: rgba(255,255,255,0.3);
-      font-size: 28px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      line-height: 1;
-      padding: 0 4px;
-    }
-    .modal-close:hover {
-      color: #c9a84c;
-      transform: rotate(90deg);
-    }
-    
-    .modal-body {
-      color: rgba(255,255,255,0.75);
-      font-size: 14px;
-      line-height: 2.2;
-      letter-spacing: 0.5px;
-      font-family: 'Georgia', serif;
-      font-style: italic;
-      padding: 4px 0;
-    }
-    
-    .modal-body .quote-start,
-    .modal-body .quote-end {
-      color: rgba(201,168,76,0.25);
-      font-size: 28px;
-      font-family: 'Georgia', serif;
-      line-height: 0;
-      display: inline-block;
-    }
-    .modal-body .quote-start {
-      margin-right: 6px;
-    }
-    .modal-body .quote-end {
-      margin-left: 6px;
-    }
-    
-    .modal-footer {
-      margin-top: 20px;
-      padding-top: 15px;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: rgba(255,255,255,0.15);
-      font-size: 9px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    
-    .modal-footer .dots {
-      color: rgba(201,168,76,0.2);
-      letter-spacing: 4px;
-    }
-    
-    /* --- responsive modal --- */
-    @media (max-width: 768px) {
-      .modal-content {
-        padding: 30px 25px 25px;
-        max-width: 90%;
-      }
-      .modal-title {
-        font-size: 14px;
-      }
-      .modal-body {
-        font-size: 12px;
-        line-height: 2;
-      }
-      .modal-body .quote-start,
-      .modal-body .quote-end {
-        font-size: 22px;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .modal-content {
-        padding: 25px 20px 20px;
-        border-radius: 16px;
-        max-width: 95%;
-        max-height: 85vh;
-      }
-      .modal-title {
-        font-size: 12px;
-        letter-spacing: 2px;
-      }
-      .modal-body {
-        font-size: 11px;
-        line-height: 1.9;
-      }
-      .modal-body .quote-start,
-      .modal-body .quote-end {
-        font-size: 18px;
-      }
-      .modal-close {
-        font-size: 22px;
-      }
-    }
-    
-    /* --- responsive base --- */
-    @media (max-width: 1024px) {
-      #main-container { padding: 16px; gap: 6px; }
-      .title-bar .title { font-size: 20px; letter-spacing: 6px; }
-      .controls { font-size: 10px; padding: 7px 16px; min-height: 34px; }
-      .info-row { font-size: 8.5px; gap: 12px; }
-      .info-row .info-item { padding: 2px 10px; }
-      .description { font-size: 7.5px; letter-spacing: 1px; }
-    }
-    @media (max-width: 768px) {
-      #main-container { padding: 12px; gap: 5px; }
-      .title-bar .title { font-size: 17px; letter-spacing: 5px; }
-      #canvas-container { padding: 0 6px; }
-      .controls { font-size: 9px; padding: 6px 14px; min-height: 32px; letter-spacing: 0.6px; }
-      .controls-row { gap: 6px; }
-      .info-row { font-size: 8px; gap: 10px; }
-      .info-row .info-item { padding: 2px 8px; }
-      .description { font-size: 7px; letter-spacing: 0.8px; padding: 2px 6px; }
-      .controls.shirt-btn .icon { font-size: 12px; }
-      .story-btn .icon { font-size: 12px; }
-    }
-    @media (max-width: 480px) {
-      #main-container { padding: 8px; gap: 4px; }
-      .title-bar .title { font-size: 14px; letter-spacing: 4px; }
-      #canvas-container { padding: 0 4px; }
-      .controls { font-size: 8px; padding: 5px 12px; min-height: 28px; border-radius: 24px; letter-spacing: 0.4px; }
-      .controls-row { gap: 4px; }
-      .info-row { font-size: 7px; gap: 8px; }
-      .info-row .info-item { padding: 2px 6px; gap: 4px; }
-      .description { font-size: 6.5px; letter-spacing: 0.6px; padding: 2px 4px; line-height: 1.6; }
-      .controls.shirt-btn .icon { font-size: 11px; }
-      .story-btn .icon { font-size: 11px; }
-    }
-    @media (max-width: 380px) {
-      #main-container { padding: 6px; gap: 3px; }
-      .title-bar .title { font-size: 12px; letter-spacing: 3px; }
-      #canvas-container { padding: 0 2px; }
-      .controls { font-size: 7px; padding: 4px 10px; min-height: 26px; border-radius: 20px; }
-      .info-row { font-size: 6.5px; gap: 6px; }
-      .info-row .info-item { padding: 1px 5px; border-radius: 14px; }
-      .description { font-size: 6px; letter-spacing: 0.5px; padding: 1px 3px; }
-      .controls.shirt-btn .icon { font-size: 10px; }
-      .story-btn .icon { font-size: 10px; }
-    }
-    @media (orientation: landscape) and (max-height: 500px) {
-      #main-container { padding: 10px 20px; gap: 4px; flex-direction: row; flex-wrap: wrap; }
-      .title-bar { width: 100%; flex-shrink: 0; }
-      .title-bar .title { font-size: 16px; letter-spacing: 4px; }
-      #canvas-container { flex: 1; min-height: 0; height: 100%; padding: 0 8px; }
-      .image-wrapper { aspect-ratio: auto; height: 100%; width: auto; }
-      .bottom-bar { width: auto; max-width: 180px; flex-shrink: 0; gap: 4px; padding: 0 4px; }
-      .controls { font-size: 8px; padding: 5px 12px; min-height: 28px; letter-spacing: 0.4px; }
-      .controls-row { flex-direction: column; gap: 4px; }
-      .info-row { font-size: 7px; gap: 6px; flex-direction: column; align-items: stretch; }
-      .info-row .info-item { padding: 2px 8px; justify-content: center; }
-      .description { font-size: 6px; max-width: 160px; padding: 1px 4px; line-height: 1.4; letter-spacing: 0.5px; }
-    }
-    @media (orientation: landscape) and (max-height: 380px) {
-      #main-container { padding: 6px 12px; gap: 3px; }
-      .title-bar .title { font-size: 13px; letter-spacing: 3px; }
-      #canvas-container { padding: 0 4px; }
-      .bottom-bar { max-width: 140px; gap: 3px; }
-      .controls { font-size: 7px; padding: 4px 10px; min-height: 24px; border-radius: 16px; }
-      .info-row { font-size: 6px; gap: 4px; }
-      .info-row .info-item { padding: 1px 6px; }
-      .description { font-size: 5.5px; max-width: 120px; padding: 1px 3px; }
-    }
+    @media (max-width: 400px) { :root { --page: min(1180px, calc(100% - 24px)); } }
     @media (prefers-reduced-motion: reduce) {
-      .controls, #slide-image, .modal-overlay, .modal-content { transition: none; }
-      #slide-image.fade { opacity: 1; transform: none; }
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
     }
   </style>
 </head>
 <body>
-<div id="main-container">
-  <!-- TITLE -->
-  <div class="title-bar">
-    <div class="title"><span class="accent">Wandering Eyes</span></div>
+
+<nav class="ribbon">
+  <span class="ribbon-brand">Wandering <em>Eyes</em></span>
+  <div class="ribbon-nav">
+    <a href="#statement">Statement</a>
+    <a href="#works">Works</a>
+    <a href="#surfaces">Surfaces</a>
+    <a href="#process">Process</a>
+    <a href="#commission">Commission</a>
+  </div>
+</nav>
+
+<header class="cover page">
+  <div class="cover-meta">
+    <span class="vol">Wandering Eyes — A Collection</span>
+    <span>Five Works · p5.js · Generative Geometry</span>
   </div>
 
-  <!-- IMAGE CONTAINER -->
-  <div id="canvas-container">
-    <div class="image-wrapper">
-      <img id="slide-image" src="" alt="p5.js artwork">
-      <img id="shirt-mockup" src="Wandering-Eyes.jpg" alt="Wandering Eyes on T-Shirt" />
+  <div class="cover-body">
+    <div class="cover-text">
+      <span class="eyebrow">A collection of five works</span>
+      <h1 class="cover-title">
+        Wandering
+        <em>Eyes</em>
+      </h1>
+      <p class="cover-sub">
+        Five works drawn with circles, rectangles,
+        triangles, and lines — a crow, a column,
+        a dance studio, a black sky, and the eye of the world.
+      </p>
+      <p class="cover-desc">
+        For fashion houses, textile studios and surface designers.
+        Each work is drawn in p5.js from a small vocabulary of
+        geometric primitives, arranged into compositions that
+        read as illustrations, diagrams, or dreams. Available to
+        license individually or as a set.
+      </p>
+    </div>
+
+    <div class="cover-art">
+      <img src="images/beyond-the-tears.gif" alt="Beyond the tears — animated p5.js composition" loading="eager" />
     </div>
   </div>
 
-  <!-- BOTTOM BAR -->
-  <div class="bottom-bar">
-    <!-- CONTROLS ROW -->
-    <div class="controls-row">
-      <div class="controls" id="controlsBar">
-        <span class="key">●</span> next work <span class="sep">—</span> <span class="key">S</span> save
-      </div>
-      <div class="controls shirt-btn" id="shirtToggle">
-        <span class="icon">◷</span> apparel
-      </div>
-      <div class="controls story-btn" id="storyBtn">
-        <span class="icon">✧</span> story
-      </div>
+  <div class="cover-foot">
+    <div>
+      <span class="k">Collection</span>
+      <span class="v">Wandering Eyes — Autumn 2026</span>
     </div>
-
-    <!-- INFO ROW -->
-    <div class="info-row">
-      <div class="info-item">
-        <span class="label">work</span>
-        <span class="value" id="workName">Crow & Human</span>
-      </div>
-      <div class="info-item">
-        <span class="label">#</span>
-        <span class="value" id="workIndex">1 / 5</span>
-      </div>
+    <div>
+      <span class="k">Works</span>
+      <span class="v">Five · p5.js · Generative geometry</span>
     </div>
-
-    <!-- DESCRIPTION -->
-    <div class="description">
-      <span class="highlight">generative geometry</span>
-      <span class="sep">·</span>
-      <span class="highlight">p5.js</span>
-      <span class="sep">·</span>
-      <span class="highlight">5 works</span>
-      <span class="sep">·</span>
-      <span class="highlight">slide show</span>
-      <span class="sep">·</span>
-      <span class="highlight">with stories</span>
-      <span class="sep">·</span>
-      <span class="highlight">apparel ready</span>
+    <div>
+      <span class="k">Medium</span>
+      <span class="v">JPG · GIF · Geometric primitives</span>
     </div>
   </div>
-</div>
+</header>
 
-<!-- ============================================
-     MODAL
-============================================ -->
-<div class="modal-overlay" id="storyModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title">
-        <span id="modalWorkName">Crow & Human</span>
-        <span class="work-number" id="modalWorkNumber">I</span>
+<section class="statement" id="statement">
+  <div class="page">
+    <div class="statement-inner">
+      <div class="statement-label">
+        <span class="num">00 / Statement</span>
+        Artist Statement
       </div>
-      <button class="modal-close" id="modalClose">✕</button>
+      <div class="statement-body">
+        <p class="statement-lead">
+          A collection of five geometric narratives —
+          <em>eyes that wander, stories that see.</em>
+        </p>
+        <p>
+          I am an Iranian-born artist working at the intersection of
+          geometric abstraction and illustration. My work begins with
+          a simple observation: the wandering eye — always moving,
+          always framing — is the origin of every image. To see is
+          to compose. To compose is to tell a story.
+        </p>
+        <p>
+          <strong>Wandering Eyes</strong> is a collection of five
+          works, each drawn with a small vocabulary of geometric
+          primitives — circles, rectangles, triangles, quads, arcs,
+          and lines. Some works read as illustrations (a crow beside
+          a human, a column of vitamins, a dance studio); others as
+          interior landscapes (a figure under a black sky, an eye
+          that sees the world).
+        </p>
+        <p>
+          Each work carries a written story — a short prose piece
+          that accompanies the composition. The stories range from
+          whimsical ("if only walls could provide vitamins") to
+          melancholic ("once, in a world cloaked beneath a perpetual
+          black sky"). Together they form a set of small fables told
+          in geometry and code.
+        </p>
+        <div class="statement-ai">
+          <strong>On AI tools —</strong> where I encountered technical
+          obstacles, I turned to AI tools for debugging and code
+          optimization. Every structural, aesthetic, and conceptual
+          decision remained my own.
+        </div>
+      </div>
     </div>
-    <div class="modal-body" id="modalBody">
-      <span class="quote-start">"</span>
-      <span id="modalStoryText">Loading story...</span>
-      <span class="quote-end">"</span>
+  </div>
+</section>
+
+<section class="section page" id="works">
+  <div class="section-head">
+    <span class="section-number">01 / Works</span>
+    <h2 class="section-title">
+      Five works,<br />
+      one <em>eye.</em>
+    </h2>
+  </div>
+
+  <div class="works-grid">
+    <!-- 01 -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">01 / Still</span>
+        <span class="work-card-edition">JPG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/crow-human.jpg" alt="Crow & Human — geometric composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        Crow &amp;
+        <em>Human</em>
+      </h3>
+      <p class="work-card-desc">
+        In a world of lovely hues, the artist's eyes wandered through
+        a canvas of circles, rectangles, and triangles, weaving a code
+        of art that posed a curious question. Amidst this vibrant realm,
+        a crow and a human roved, creating an arc of escape, where pink
+        blended with colours.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">Circles · Rectangles · Triangles</span></div>
+        <div><span class="k">Palette</span><span class="v">Pink · Multicolour</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">JPG</span></div>
+      </div>
+    </article>
+
+    <!-- 02 -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">02 / Still</span>
+        <span class="work-card-edition">JPG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/rove-column.jpg" alt="Rove Column — geometric composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        Rove
+        <em>Column</em>
+      </h3>
+      <p class="work-card-desc">
+        If only walls could provide vitamins! Imagine waking up to a
+        nutritious wall column, delivering a daily dose of vitamin
+        art, positivity, and aesthetic wellness — making your living
+        space not just visually appealing but also nutritionally
+        enriching.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">Circles · Triangles · Quads · Lines</span></div>
+        <div><span class="k">Palette</span><span class="v">Vitamin colour</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">JPG</span></div>
+      </div>
+    </article>
+
+    <!-- 03 -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">03 / Still</span>
+        <span class="work-card-edition">JPG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/dance-studio.jpg" alt="Dance Studio — geometric composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        Dance
+        <em>Studio</em>
+      </h3>
+      <p class="work-card-desc">
+        In a vibrant dance studio, eyes sparkled with anticipation as
+        colourful shoes embraced the floor, their rhythmic movements
+        creating a lively escape. The music guided their wandering
+        steps, forming shapes and lines that wove a tapestry of
+        triangles, rectangles, and circles.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">Triangles · Rectangles · Circles</span></div>
+        <div><span class="k">Palette</span><span class="v">Vivid colour</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">JPG</span></div>
+      </div>
+    </article>
+
+    <!-- 04 -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">04 / Animated</span>
+        <span class="work-card-edition">GIF</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/beyond-the-tears.gif" alt="Beyond the tears — animated geometric composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        Beyond the
+        <em>tears</em>
+      </h3>
+      <p class="work-card-desc">
+        Once, in a world cloaked beneath a perpetual black sky, there
+        lived a solitary figure known as Anika. With one eye reflecting
+        the weight of accumulated sorrows, Anika navigated a landscape
+        obscured by shadows. Tears, like raindrops, fell silently,
+        leaving a trail of melancholy in her wake.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">Arcs · Rain particles</span></div>
+        <div><span class="k">Palette</span><span class="v">Rainbow on black</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">GIF</span></div>
+      </div>
+    </article>
+
+    <!-- 05 -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">05 / Still</span>
+        <span class="work-card-edition">JPG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/th-eye-of-the-world.jpg" alt="The eye of the world — geometric composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        The eye of
+        <em>the world</em>
+      </h3>
+      <p class="work-card-desc">
+        The eye of the world sees everything and nothing. It watches
+        the rise and fall of empires, the birth and death of stars.
+        In its gaze, all things are connected — the ant and the
+        mountain, the whisper and the thunder, the beginning and
+        the end.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">Arcs · Circles · Lines</span></div>
+        <div><span class="k">Palette</span><span class="v">Cosmic</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">JPG</span></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="application" id="surfaces">
+  <div class="page">
+    <div class="section-head">
+      <span class="section-number">02 / Surfaces</span>
+      <h2 class="section-title">
+        Five works.<br />
+        <em>Twenty surfaces.</em>
+      </h2>
     </div>
-    <div class="modal-footer">
-      <span>✦ wandering eyes</span>
-      <span class="dots">···</span>
+
+    <p class="application-intro">
+      Each work, presented across fabric, scarf, textile and wall —
+      <span>reproduced at different aspect ratios without loss of
+      structure.</span>
+    </p>
+
+    <!-- Work 01 -->
+    <div class="surface-work-head">
+      <h3>Crow &amp; <em>Human</em></h3>
+      <p>Four surfaces, one work. The composition is tiled to fill each aspect ratio.</p>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">i</span><span>Print</span></div>
+        <div class="surface-tile" style="aspect-ratio: 1; background-image: url('images/crow-human.jpg'); background-size: contain;"></div>
+        <div class="surface-title">Archival print</div>
+        <div class="surface-meta">1 : 1 · Cotton rag</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">ii</span><span>Scarf</span></div>
+        <div class="surface-tile" style="aspect-ratio: 3 / 1; background-image: url('images/crow-human.jpg'); background-size: 33.33% 100%;"></div>
+        <div class="surface-title">Silk scarf</div>
+        <div class="surface-meta">3 : 1 · Twill silk</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iii</span><span>Textile</span></div>
+        <div class="surface-tile" style="aspect-ratio: 4 / 3; background-image: url('images/crow-human.jpg'); background-size: 50% 50%;"></div>
+        <div class="surface-title">Fabric yardage</div>
+        <div class="surface-meta">4 : 3 · Repeat tile</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iv</span><span>Wall</span></div>
+        <div class="surface-tile" style="aspect-ratio: 2 / 3; background-image: url('images/crow-human.jpg'); background-size: 100% 50%;"></div>
+        <div class="surface-title">Wallpaper</div>
+        <div class="surface-meta">2 : 3 · Vertical repeat</div>
+      </div>
+    </div>
+
+    <!-- Work 04 — Beyond the tears (GIF) -->
+    <div class="surface-work-head">
+      <h3>Beyond the <em>tears</em></h3>
+      <p>Animated work, tiled across four materials.</p>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">i</span><span>Print</span></div>
+        <div class="surface-tile" style="aspect-ratio: 1; background-image: url('images/beyond-the-tears.gif'); background-size: contain;"></div>
+        <div class="surface-title">Archival print</div>
+        <div class="surface-meta">1 : 1 · Cotton rag</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">ii</span><span>Scarf</span></div>
+        <div class="surface-tile" style="aspect-ratio: 3 / 1; background-image: url('images/beyond-the-tears.gif'); background-size: 33.33% 100%;"></div>
+        <div class="surface-title">Silk scarf</div>
+        <div class="surface-meta">3 : 1 · Twill silk</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iii</span><span>Textile</span></div>
+        <div class="surface-tile" style="aspect-ratio: 4 / 3; background-image: url('images/beyond-the-tears.gif'); background-size: 50% 50%;"></div>
+        <div class="surface-title">Fabric yardage</div>
+        <div class="surface-meta">4 : 3 · Repeat tile</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iv</span><span>Wall</span></div>
+        <div class="surface-tile" style="aspect-ratio: 2 / 3; background-image: url('images/beyond-the-tears.gif'); background-size: 100% 50%;"></div>
+        <div class="surface-title">Wallpaper</div>
+        <div class="surface-meta">2 : 3 · Vertical repeat</div>
+      </div>
+    </div>
+
+    <!-- Work 05 — The eye of the world -->
+    <div class="surface-work-head">
+      <h3>The eye of <em>the world</em></h3>
+      <p>The final work of the collection, tiled across four materials.</p>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">i</span><span>Print</span></div>
+        <div class="surface-tile" style="aspect-ratio: 1; background-image: url('images/th-eye-of-the-world.jpg'); background-size: contain;"></div>
+        <div class="surface-title">Archival print</div>
+        <div class="surface-meta">1 : 1 · Cotton rag</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">ii</span><span>Scarf</span></div>
+        <div class="surface-tile" style="aspect-ratio: 3 / 1; background-image: url('images/th-eye-of-the-world.jpg'); background-size: 33.33% 100%;"></div>
+        <div class="surface-title">Silk scarf</div>
+        <div class="surface-meta">3 : 1 · Twill silk</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iii</span><span>Textile</span></div>
+        <div class="surface-tile" style="aspect-ratio: 4 / 3; background-image: url('images/th-eye-of-the-world.jpg'); background-size: 50% 50%;"></div>
+        <div class="surface-title">Fabric yardage</div>
+        <div class="surface-meta">4 : 3 · Repeat tile</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iv</span><span>Wall</span></div>
+        <div class="surface-tile" style="aspect-ratio: 2 / 3; background-image: url('images/th-eye-of-the-world.jpg'); background-size: 100% 50%;"></div>
+        <div class="surface-title">Wallpaper</div>
+        <div class="surface-meta">2 : 3 · Vertical repeat</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section page" id="process">
+  <div class="section-head">
+    <span class="section-number">03 / Process</span>
+    <h2 class="section-title">
+      Structure<br />
+      behind the <em>eye.</em>
+    </h2>
+  </div>
+
+  <div class="process-grid">
+    <article class="process-card">
+      <span class="process-number">01 / Primitives</span>
+      <h3>Geometric Vocabulary</h3>
+      <p>
+        Every work in this collection is drawn from a small set of
+        geometric primitives: circles, rectangles, triangles, quads,
+        arcs, and lines. There is no raster image, no imported texture,
+        no photograph. Every shape is placed by code, so the work is
+        legible at any scale — from a print to a wall.
+      </p>
+    </article>
+
+    <article class="process-card">
+      <span class="process-number">02 / Story</span>
+      <h3>Each Work Has One</h3>
+      <p>
+        Every work carries a written story — a short prose piece that
+        accompanies the composition. The stories range from whimsical
+        (a wall column that delivers vitamins) to melancholic (a
+        solitary figure under a perpetual black sky). The collection
+        is not just a set of images; it is a set of fables told in
+        geometry.
+      </p>
+    </article>
+
+    <article class="process-card">
+      <span class="process-number">03 / The Eye</span>
+      <h3>Wandering Gaze</h3>
+      <p>
+        The collection is held together by the eye — the sense of
+        sight, the act of looking, the wandering gaze. Some works
+        literally contain eyes; others are about the act of seeing.
+        The title comes from the sense that these are not drawings
+        of objects, but of what the eye notices as it moves across
+        a scene.
+      </p>
+    </article>
+  </div>
+</section>
+
+<section class="commission" id="commission">
+  <div class="page">
+    <div class="commission-layout">
+      <div>
+        <span class="eyebrow">For brands &amp; studios</span>
+        <h2 class="commission-title">
+          Five works.<br />
+          One <em>eye.</em>
+        </h2>
+      </div>
+      <div>
+        <p class="commission-copy">
+          Wandering Eyes is a collection rather than a single artwork.
+          Its geometric-narrative language can be licensed as a set,
+          commissioned as a new variation, or built into a private
+          tool for your studio's ongoing use.
+        </p>
+        <div class="service-list">
+          <div class="service-item">
+            <span class="num">i</span>
+            <div>
+              <span class="title">Collection licence</span>
+              <span class="desc">All five works licensed together for a single-product run or an extended term.</span>
+            </div>
+          </div>
+          <div class="service-item">
+            <span class="num">ii</span>
+            <div>
+              <span class="title">Commission a work</span>
+              <span class="desc">A new composition in the same vocabulary — your palette, your primitives, your story.</span>
+            </div>
+          </div>
+          <div class="service-item">
+            <span class="num">iii</span>
+            <div>
+              <span class="title">Systems</span>
+              <span class="desc">A private Wandering Eyes tool built for your studio's ongoing use.</span>
+            </div>
+          </div>
+        </div>
+        <a class="contact-cta" href="mailto:reyhanehdaneshdoost@gmail.com?subject=Wandering%20Eyes%20—%20Collaboration">Begin a Conversation</a>
+      </div>
+    </div>
+
+    <div class="mockup-gallery">
+      <div class="mockup-head">
+        <span class="eyebrow">Applied · Wandering Eyes</span>
+        <h3 class="mockup-title">
+          The collection,<br />
+          <em>three surfaces.</em>
+        </h3>
+      </div>
+      <div class="mockup-grid">
+        <figure class="mockup-item">
+          <div class="mockup-frame">
+            <img src="images/tote.png" alt="Wandering Eyes tote bag — applied composition" loading="lazy" />
+          </div>
+          <figcaption>
+            <span class="mockup-id">01 / Tote</span>
+            <span class="mockup-seed">Wandering Eyes</span>
+          </figcaption>
+        </figure>
+        <figure class="mockup-item">
+          <div class="mockup-frame">
+            <img src="images/tee.png" alt="Wandering Eyes t-shirt — applied composition" loading="lazy" />
+          </div>
+          <figcaption>
+            <span class="mockup-id">02 / Apparel</span>
+            <span class="mockup-seed">Wandering Eyes</span>
+          </figcaption>
+        </figure>
+        <figure class="mockup-item">
+          <div class="mockup-frame">
+            <img src="images/cushion.png" alt="Wandering Eyes cushion — applied composition" loading="lazy" />
+          </div>
+          <figcaption>
+            <span class="mockup-id">03 / Interior</span>
+            <span class="mockup-seed">Wandering Eyes</span>
+          </figcaption>
+        </figure>
+      </div>
+      <p class="mockup-note">
+        Each work is drawn in p5.js from geometric primitives and
+        reproducible from source. Licensable individually or as the
+        full set.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer class="colophon page">
+  <div class="col">
+    <span class="col-mark">Wandering <em>Eyes</em></span>
+    <p>
+      A collection of five computational geometric-narrative
+      compositions, published as an open series.
+    </p>
+  </div>
+  <div class="col">
+    <span class="col-title">Collection</span>
+    <a href="#statement">Statement</a>
+    <a href="#works">Works</a>
+    <a href="#surfaces">Surfaces</a>
+    <a href="#process">Process</a>
+    <a href="#commission">Commission</a>
+  </div>
+  <div class="col">
+    <span class="col-title">Works</span>
+    <a href="#">Crow &amp; Human</a>
+    <a href="#">Rove Column</a>
+    <a href="#">Dance Studio</a>
+    <a href="#">Beyond the tears</a>
+    <a href="#">The eye of the world</a>
+  </div>
+  <div class="col">
+    <span class="col-title">Studio</span>
+    <a href="mailto:reyhanehdaneshdoost@gmail.com">reyhanehdaneshdoost@gmail.com</a>
+    <a href="https://reyrove.github.io/">Website</a>
+    <a href="https://www.instagram.com/rey._.rove/">Instagram</a>
+    <a href="https://www.linkedin.com/in/reyhaneh-daneshdoost-730481160/">LinkedIn</a>
+    <a href="https://x.com/reyrove">X</a>
+  </div>
+  <div class="colophon-end">
+    <span>© <span id="year"></span> Wandering Eyes · Five works, one eye</span>
+    <span class="mark">Computational Geometric Studies</span>
+  </div>
+</footer>
+
+<div class="legal-modal" id="legalModal" aria-hidden="true">
+  <div class="legal-overlay" data-close></div>
+  <div class="legal-dialog" role="dialog" aria-modal="true" aria-labelledby="legalTitle">
+    <button class="legal-close" type="button" data-close aria-label="Close">×</button>
+    <span class="legal-eyebrow" id="legalEyebrow">Legal</span>
+    <h3 class="legal-title" id="legalTitle">—</h3>
+    <div class="legal-body" id="legalBody"></div>
+    <div class="legal-foot">
+      <span>Wandering Eyes</span>
+      <a href="mailto:reyhanehdaneshdoost@gmail.com">reyhanehdaneshdoost@gmail.com</a>
     </div>
   </div>
 </div>
 
 <script>
-  (function() {
-    // --- LIST OF 5 IMAGES WITH FULL STORIES ---
-    const works = [
-      { 
-        name: 'Crow & Human', 
-        file: 'crow-human.jpg',
-        story: 'In a world of lovely hues, the artist\'s eyes wandered through a canvas of circles, rectangles, and triangles, weaving a code of art that posed a curious question. Amidst this vibrant realm, a crow and a human roved, creating an arc of escape, where pink blended with colors, forming a captivating tapestry in this whimsical and enchanting world!'
-      },
-      { 
-        name: 'Rove Column', 
-        file: 'rove-column.jpg',
-        story: 'If only walls could provide vitamins! Imagine waking up to a nutritious wall column, delivering a daily dose of vitamin art, positivity, and aesthetic wellness—making your living space not just visually appealing but also nutritionally enriching!This is a code art that I made it with some shapes include circles, triangles, quads and lines in p5.js.'
-      },
-      { 
-        name: 'Dance Studio', 
-        file: 'dance-studio.jpg',
-        story: 'In a vibrant dance studio, eyes sparkled with anticipation as colorful shoes embraced the floor, their rhythmic movements creating a lively escape. The music guided their wandering steps, forming shapes and lines that wove a tapestry of triangles, rectangles, and circles, transcending the boundaries of a simple square. It was a code of art, where every movement painted a story in vivid colors.This is made with some codes in p5.js.'
-      },
-      { 
-        name: 'Beyond the tears', 
-        file: 'beyond-the-tears.gif',
-        story: 'Once, in a world cloaked beneath a perpetual black sky, there lived a solitary figure known as Anika. With one eye reflecting the weight of accumulated sorrows, Anika navigated a landscape obscured by shadows. Tears, like raindrops, fell silently, leaving a trail of melancholy in her wake.In the midst of Anika\'s desolation, a mysterious event unfolded. A radiant rainbow materialized, defying the eternal darkness. Its vibrant hues painted the somber sky, offering a glimmer of hope. One eye, accustomed to the monochrome, widened in awe at the unexpected burst of color. As Anika followed the spectrum\'s arch, the journey revealed both beauty and sacrifice. To illuminate the blackened expanse, a sacrifice was required—a relinquishment of personal pain. With a profound choice, Anika offered her tears to the cosmic canvas, a selfless act to bring forth the rainbow\'s brilliance.The transformative power of this sacrifice went beyond the visual spectacle. Lost emotions, once shrouded in darkness, found clarity and purpose. The tears, now stars in the night sky, narrated stories of resilience and purity. In the end, Anika\'s sacrifice not only illuminated the world but also mended the fractures of a wounded heart. The once-lost soul discovered that within the depths of sorrow, a radiant light could emerge, forging a path toward a more vibrant and meaningful existence beneath the ever-changing canvas of the black sky. Made by coding in p5js. I drew an eye with some arcs on a black canvas. Then I wrote a function for rain effect and used random colors for rain drops.'
-      },
-      { 
-        name: 'The eye of the world', 
-        file: 'th-eye-of-the-world.jpg',
-        story: 'The eye of the world sees everything and nothing. It watches the rise and fall of empires, the birth and death of stars. In its gaze, all things are connected—the ant and the mountain, the whisper and the thunder, the beginning and the end. It is the witness of all things, the silent observer of the infinite dance of existence.'
-      }
-    ];
+  // ============================================================
+  // WANDERING EYES — COLLECTION PAGE
+  //
+  // Five works drawn with geometric primitives in p5.js.
+  // Four stills + one animated GIF, presented as a
+  // collection with works grid, surfaces, process, and
+  // commission sections.
+  //
+  // No JavaScript animation — the browser handles GIF
+  // playback and JPG display natively.
+  // ============================================================
 
-    // Roman numerals for chapter display
-    const romanNumerals = ['I', 'II', 'III', 'IV', 'V'];
-
-    // --- state ---
-    let currentIndex = 0;
-    let apparelMode = false;
-    
-    const imgElement = document.getElementById('slide-image');
-    const shirtMockup = document.getElementById('shirt-mockup');
-    const workNameSpan = document.getElementById('workName');
-    const workIndexSpan = document.getElementById('workIndex');
-    const controlsBar = document.getElementById('controlsBar');
-    const shirtToggle = document.getElementById('shirtToggle');
-    const storyBtn = document.getElementById('storyBtn');
-
-    // Modal elements
-    const modalOverlay = document.getElementById('storyModal');
-    const modalClose = document.getElementById('modalClose');
-    const modalWorkName = document.getElementById('modalWorkName');
-    const modalWorkNumber = document.getElementById('modalWorkNumber');
-    const modalStoryText = document.getElementById('modalStoryText');
-
-    // --- load image with fade ---
-    function loadImage(index) {
-      if (index >= works.length) index = 0;
-      if (index < 0) index = works.length - 1;
-      currentIndex = index;
-
-      const work = works[currentIndex];
-      
-      // If apparel mode is on, switch back to artwork
-      if (apparelMode) {
-        toggleApparel();
-      }
-      
-      // Fade image
-      imgElement.classList.add('fade');
-
-      setTimeout(() => {
-        imgElement.src = work.file;
-        imgElement.alt = work.name;
-        workNameSpan.textContent = work.name;
-        workIndexSpan.textContent = (currentIndex + 1) + ' / ' + works.length;
-        
-        // Update modal content (so it's ready when opened)
-        modalWorkName.textContent = work.name;
-        modalWorkNumber.textContent = romanNumerals[currentIndex] || (currentIndex + 1);
-        modalStoryText.textContent = work.story;
-        
-        imgElement.classList.remove('fade');
-      }, 300);
+  const legalContent = {
+    licensing: {
+      eyebrow: 'Legal · 01',
+      title: 'Licensing',
+      body: `<p>All five works in Wandering Eyes are available for licensing individually or as a collection.</p><p>Standard licences cover single-product production runs. For commercial use, custom editions, or exclusive rights, please contact the studio directly to discuss scope and terms.</p><p>Each work is reproducible from the p5.js source, using geometric primitives.</p>`
+    },
+    terms: {
+      eyebrow: 'Legal · 02',
+      title: 'Terms',
+      body: `<p>All artwork, code, and motion systems presented in this collection are the <strong>intellectual property of the artist</strong>.</p><p>Works may not be reproduced, redistributed, resold, or adapted without a written licence.</p>`
+    },
+    credits: {
+      eyebrow: 'Legal · 03',
+      title: 'Credits',
+      body: `<p><strong>Design &amp; Code</strong><br>Reyhaneh Daneshdoost</p><p><strong>Typefaces</strong><br>Cormorant Garamond · DM Mono</p><p><strong>Collection</strong><br>Wandering Eyes — Autumn 2026</p><p><strong>Reference</strong><br>p5.js · Generative geometry</p>`
     }
+  };
 
-    // --- next / prev ---
-    function nextWork() {
-      const nextIndex = (currentIndex + 1) % works.length;
-      loadImage(nextIndex);
-    }
-    function prevWork() {
-      const prevIndex = (currentIndex - 1 + works.length) % works.length;
-      loadImage(prevIndex);
-    }
+  function initLegalModal() {
+    const modal = document.getElementById('legalModal');
+    const eyebrow = document.getElementById('legalEyebrow');
+    const titleEl = document.getElementById('legalTitle');
+    const bodyEl = document.getElementById('legalBody');
+    if (!modal) return;
 
-    // --- save current image ---
-    function saveImage() {
-      const work = works[currentIndex];
-      const link = document.createElement('a');
-      
-      if (apparelMode) {
-        link.href = shirtMockup.src;
-        const filename = 'Wandering_Eyes_Apparel.jpg';
-        link.download = filename;
-      } else {
-        link.href = imgElement.src;
-        const filename = 'Wandering_Eyes_' + work.name.replace(/\s+/g, '_') + '.jpg';
-        link.download = filename;
-      }
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    // --- toggle apparel ---
-    function toggleApparel() {
-      apparelMode = !apparelMode;
-      
-      if (apparelMode) {
-        // Show mockup, hide artwork
-        imgElement.style.display = 'none';
-        shirtMockup.classList.add('active');
-        shirtToggle.classList.add('active');
-        shirtToggle.innerHTML = '<span class="icon">◷</span> artwork';
-        shirtMockup.style.boxShadow = '0 0 80px rgba(201, 168, 76, 0.3), 0 0 160px rgba(201, 168, 76, 0.1)';
-        shirtMockup.style.border = '1px solid rgba(201, 168, 76, 0.15)';
-      } else {
-        // Show artwork, hide mockup
-        imgElement.style.display = 'block';
-        shirtMockup.classList.remove('active');
-        shirtToggle.classList.remove('active');
-        shirtToggle.innerHTML = '<span class="icon">◷</span> apparel';
-        shirtMockup.style.boxShadow = 'none';
-        shirtMockup.style.border = 'none';
-      }
-    }
-
-    // --- MODAL FUNCTIONS ---
-    function openModal() {
-      const work = works[currentIndex];
-      modalWorkName.textContent = work.name;
-      modalWorkNumber.textContent = romanNumerals[currentIndex] || (currentIndex + 1);
-      modalStoryText.textContent = work.story;
-      
-      modalOverlay.classList.add('open');
+    function openLegal(key) {
+      const data = legalContent[key];
+      if (!data) return;
+      eyebrow.textContent = data.eyebrow;
+      titleEl.textContent = data.title;
+      bodyEl.innerHTML = data.body;
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
     }
-
-    function closeModal() {
-      modalOverlay.classList.remove('open');
+    function closeLegal() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
     }
-
-    // --- event listeners ---
-    controlsBar.addEventListener('click', nextWork);
-    controlsBar.addEventListener('touchend', function(e) {
-      e.preventDefault();
-      nextWork();
+    document.querySelectorAll('[data-legal]').forEach(link => {
+      link.addEventListener('click', e => { e.preventDefault(); openLegal(link.getAttribute('data-legal')); });
     });
+    modal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', closeLegal));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) closeLegal(); });
+  }
 
-    shirtToggle.addEventListener('click', toggleApparel);
-    shirtToggle.addEventListener('touchend', function(e) {
-      e.preventDefault();
-      toggleApparel();
-    });
+  function init() {
+    const y = document.getElementById('year');
+    if (y) y.textContent = new Date().getFullYear();
+    initLegalModal();
+  }
 
-    storyBtn.addEventListener('click', openModal);
-    storyBtn.addEventListener('touchend', function(e) {
-      e.preventDefault();
-      openModal();
-    });
-
-    modalClose.addEventListener('click', closeModal);
-    modalClose.addEventListener('touchend', function(e) {
-      e.preventDefault();
-      closeModal();
-    });
-
-    // Close modal on overlay click (click outside content)
-    modalOverlay.addEventListener('click', function(e) {
-      if (e.target === modalOverlay) {
-        closeModal();
-      }
-    });
-
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && modalOverlay.classList.contains('open')) {
-        closeModal();
-      }
-    });
-
-    // keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'ArrowRight' || e.key === 'n' || e.key === 'N') {
-        e.preventDefault();
-        nextWork();
-      }
-      if (e.key === 'ArrowLeft' || e.key === 'p' || e.key === 'P') {
-        e.preventDefault();
-        prevWork();
-      }
-      if (e.key === ' ' || e.key === 'Space') {
-        e.preventDefault();
-        nextWork();
-      }
-      if (e.key === 's' || e.key === 'S') {
-        e.preventDefault();
-        saveImage();
-      }
-      if (e.key === 'a' || e.key === 'A') {
-        e.preventDefault();
-        toggleApparel();
-      }
-      if (e.key === 'c' || e.key === 'C') {
-        e.preventDefault();
-        if (modalOverlay.classList.contains('open')) {
-          closeModal();
-        } else {
-          openModal();
-        }
-      }
-    });
-
-    // --- init ---
-    function init() {
-      const first = works[0];
-      imgElement.src = first.file;
-      imgElement.alt = first.name;
-      workNameSpan.textContent = first.name;
-      workIndexSpan.textContent = '1 / ' + works.length;
-      
-      // Pre-populate modal
-      modalWorkName.textContent = first.name;
-      modalWorkNumber.textContent = 'I';
-      modalStoryText.textContent = first.story;
-      
-      imgElement.classList.remove('fade');
-      imgElement.style.display = 'block';
-      apparelMode = false;
-      shirtToggle.classList.remove('active');
-      shirtToggle.innerHTML = '<span class="icon">◷</span> apparel';
-      shirtMockup.classList.remove('active');
-      shirtMockup.style.boxShadow = 'none';
-      shirtMockup.style.border = 'none';
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-
-    window.nextWork = nextWork;
-    window.prevWork = prevWork;
-    window.saveImage = saveImage;
-    window.toggleApparel = toggleApparel;
-    window.openModal = openModal;
-    window.closeModal = closeModal;
-  })();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 </script>
+
 </body>
 </html>
